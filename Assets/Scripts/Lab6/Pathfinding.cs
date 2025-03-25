@@ -18,103 +18,131 @@ public class Pathfinding : MonoBehaviour
         FindPathDFS();
         FindPathBFS();
     }
-    
-    public List<Vertex> FindPathDFS()   // просто находит путь, не особо кратчайший
+
+    public List<Vertex> FindPathDFS()   // метод ищет путь с помощью поиска в глубину (dfs), но не обязательно кратчайший
     {
+        // находим ближайшую вершину к стартовой и конечной точке
         Vertex startVertex = graph.GetNearestVertex(transform.position);
         Vertex endVertex = graph.GetNearestVertex(endPoint.position);
-        
+
+        // список для хранения пути
         List<Vertex> path = new List<Vertex>();
 
-        bool[] visited = new bool[graph.vertices.Count];    // тут посещенные вершины, чтобы не ходить по кругу
-        visited[startVertex.id] = true; 
-        
-        Stack<Vertex> toVisit = new Stack<Vertex>();    // отсюда берем следующего соседа
-        foreach (var neighbour in startVertex.neighbours)   // добавляем изначальных соседей
-        {
-            toVisit.Push(neighbour.vertex);
-            neighbour.vertex.prev = startVertex;    // записываем в вершину, откуда в нее пришли, чтобы потом с конца восстановить путь
-        }
-
-        while (toVisit.Count != 0)
-        {
-            Vertex currentVertex = toVisit.Pop();   // берем текущую вершину для посещения
-
-            if (currentVertex == endVertex) // однажды попадет сюда и выйдет
-                break;
-
-            foreach (var nextNeighbour in currentVertex.neighbours) // добавляем в стек всех соседей текущей вершины, дальше пойдем по ним
-            {
-                if(visited[nextNeighbour.vertex.id] == true)
-                    continue;
-                toVisit.Push(nextNeighbour.vertex);
-                nextNeighbour.vertex.prev = currentVertex;
-            }
-            visited[currentVertex.id] = true;
-            
-        }
-
-        Vertex currentPathVertex = endVertex;
-        while (currentPathVertex != startVertex)    // восстанавливаем путь с конца, можно бы в отдельную функцию, тут везде такое
-        {
-            if(drawPath)
-                Debug.DrawLine(currentPathVertex.transform.position, 
-                    currentPathVertex.prev.transform.position, Color.green, 1000f);
-            path.Add(currentPathVertex);
-            currentPathVertex = currentPathVertex.prev;
-
-        }
-        path.Reverse();
-        return path;
-    }
-    
-    public List<Vertex> FindPathBFS()   // находит путь, кратчайший ТОЛЬКО если все расстояния между вершинами одинавые (maxNeighbourDistance = 3)
-    {
-        Vertex startVertex = graph.GetNearestVertex(transform.position);
-        Vertex endVertex = graph.GetNearestVertex(endPoint.position);
-        
-        List<Vertex> path = new List<Vertex>();
-
+        // массив для хранения посещенных вершин, чтобы не ходить по кругу
         bool[] visited = new bool[graph.vertices.Count];
-        visited[startVertex.id] = true;
+        visited[startVertex.id] = true; // сразу помечаем стартовую вершину как посещенную
 
-        Queue<Vertex> toVisit = new Queue<Vertex>();    // все то же самое, но тут очередь
+        // стек для хранения вершин, которые нужно посетить (стек используется в dfs)
+        Stack<Vertex> toVisit = new Stack<Vertex>();
+
+        // добавляем всех соседей стартовой вершины в стек
         foreach (var neighbour in startVertex.neighbours)
         {
-            toVisit.Enqueue(neighbour.vertex);
-            neighbour.vertex.prev = startVertex;
+            toVisit.Push(neighbour.vertex); // добавляем соседа в стек
+            neighbour.vertex.prev = startVertex; // записываем, откуда пришли, чтобы потом восстановить путь
         }
 
+        // начинаем обход графа в глубину
         while (toVisit.Count != 0)
         {
-            Vertex currentVertex = toVisit.Dequeue();
+            Vertex currentVertex = toVisit.Pop();   // берем вершину из стека
 
-            if (currentVertex == endVertex)
+            if (currentVertex == endVertex) // если дошли до конечной вершины, выходим из цикла
                 break;
 
+            // перебираем всех соседей текущей вершины
             foreach (var nextNeighbour in currentVertex.neighbours)
             {
-                if(visited[nextNeighbour.vertex.id] == true)
+                if (visited[nextNeighbour.vertex.id] == true) // если уже посещали, пропускаем
                     continue;
-                toVisit.Enqueue(nextNeighbour.vertex);
-                nextNeighbour.vertex.prev = currentVertex;
+
+                toVisit.Push(nextNeighbour.vertex); // добавляем соседа в стек
+                nextNeighbour.vertex.prev = currentVertex; // запоминаем, откуда пришли
             }
-            visited[currentVertex.id] = true;
-            
+
+            visited[currentVertex.id] = true; // отмечаем текущую вершину как посещенную
         }
 
+        // начинаем восстановление пути от конечной вершины к стартовой
         Vertex currentPathVertex = endVertex;
         while (currentPathVertex != startVertex)
         {
-            if(drawPath)
-                Debug.DrawLine(currentPathVertex.transform.position, 
-                    currentPathVertex.prev.transform.position, Color.blue, 1000f);
-            path.Add(currentPathVertex);
-            currentPathVertex = currentPathVertex.prev;
+            if (drawPath) // если включена отрисовка пути, рисуем линию между вершинами в unity
+                Debug.DrawLine(currentPathVertex.transform.position,
+                    currentPathVertex.prev.transform.position, Color.green, 1000f);
 
+            path.Add(currentPathVertex); // добавляем вершину в путь
+            currentPathVertex = currentPathVertex.prev; // идем к предыдущей вершине
         }
 
-        path.Reverse();
-        return path;
+        path.Reverse(); // так как путь восстанавливался с конца, переворачиваем его
+
+        // выводим id всех вершин пути в консоль
+        //foreach (var v in path)
+        //{
+        //    Debug.Log(v.id);
+        //}
+
+        return path; // возвращаем найденный путь
+    }
+
+    public List<Vertex> FindPathBFS()   // находит путь, кратчайший только если все расстояния между вершинами одинаковые
+    {
+        // находим ближайшие вершины к стартовой и конечной точке
+        Vertex startVertex = graph.GetNearestVertex(transform.position);
+        Vertex endVertex = graph.GetNearestVertex(endPoint.position);
+
+        // создаем список для хранения пути
+        List<Vertex> path = new List<Vertex>();
+
+        // массив для хранения посещенных вершин
+        bool[] visited = new bool[graph.vertices.Count];
+        visited[startVertex.id] = true; // сразу помечаем стартовую вершину как посещенную
+
+        // создаем очередь для BFS (поиск в ширину)
+        Queue<Vertex> toVisit = new Queue<Vertex>();
+
+        // добавляем соседей стартовой вершины в очередь
+        foreach (var neighbour in startVertex.neighbours)
+        {
+            toVisit.Enqueue(neighbour.vertex);
+            neighbour.vertex.prev = startVertex; // запоминаем, откуда пришли
+        }
+
+        // запускаем обход графа в ширину
+        while (toVisit.Count != 0)
+        {
+            Vertex currentVertex = toVisit.Dequeue(); // берем вершину из очереди
+
+            if (currentVertex == endVertex) // если дошли до конечной вершины, выходим из цикла
+                break;
+
+            // добавляем соседей текущей вершины в очередь
+            foreach (var nextNeighbour in currentVertex.neighbours)
+            {
+                if (visited[nextNeighbour.vertex.id] == true) // если уже посещена, пропускаем
+                    continue;
+
+                toVisit.Enqueue(nextNeighbour.vertex); // добавляем в очередь
+                nextNeighbour.vertex.prev = currentVertex; // запоминаем, откуда пришли
+            }
+            visited[currentVertex.id] = true; // отмечаем вершину как посещенную
+        }
+
+        // начинаем восстановление пути от конечной вершины к стартовой
+        Vertex currentPathVertex = endVertex;
+        while (currentPathVertex != startVertex)
+        {
+            if (drawPath) // если включена отрисовка пути, рисуем линию между вершинами в unity
+                Debug.DrawLine(currentPathVertex.transform.position,
+                    currentPathVertex.prev.transform.position, Color.blue, 1000f);
+
+            path.Add(currentPathVertex); // добавляем вершину в путь
+            currentPathVertex = currentPathVertex.prev; // идем к предыдущей вершине
+        }
+
+        path.Reverse(); // разворачиваем путь, чтобы он шел от начала до конца
+
+        return path; // возвращаем найденный путь
     }
 }
