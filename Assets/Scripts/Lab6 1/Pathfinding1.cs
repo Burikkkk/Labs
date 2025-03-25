@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Pathfinding : MonoBehaviour
+public class Pathfinding1 : MonoBehaviour
 {
     public Transform endPoint;
     public GraphGenerator graphGenerator;
