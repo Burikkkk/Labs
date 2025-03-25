@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class Pathfinding : MonoBehaviour
@@ -34,6 +33,7 @@ public class Pathfinding : MonoBehaviour
         {
             toVisit.Push(neighbour.vertex);
             neighbour.vertex.prev = startVertex;    // записываем в вершину, откуда в нее пришли, чтобы потом с конца восстановить путь
+            visited[neighbour.vertex.id] = true;
         }
 
         while (toVisit.Count != 0)
@@ -43,23 +43,27 @@ public class Pathfinding : MonoBehaviour
             if (currentVertex == endVertex) // однажды попадет сюда и выйдет
                 break;
 
-            foreach (var nextNeighbour in currentVertex.neighbours) // добавляем в стек всех соседей текущей вершины, дальше пойдем по ним
+            foreach (var nextNeighbour in
+                     currentVertex.neighbours) // добавляем в стек всех соседей текущей вершины, дальше пойдем по ним
             {
-                if(visited[nextNeighbour.vertex.id] == true)
+                if (visited[nextNeighbour.vertex.id] == true)
                     continue;
+                visited[nextNeighbour.vertex.id] = true;
                 toVisit.Push(nextNeighbour.vertex);
                 nextNeighbour.vertex.prev = currentVertex;
             }
-            visited[currentVertex.id] = true;
-            
         }
-
+        
         Vertex currentPathVertex = endVertex;
+        int k = 0;
         while (currentPathVertex != startVertex)    // восстанавливаем путь с конца, можно бы в отдельную функцию, тут везде такое
         {
-            if(drawPath)
+            if (drawPath)
+            {
                 Debug.DrawLine(currentPathVertex.transform.position, 
                     currentPathVertex.prev.transform.position, Color.green, 1000f);
+            }
+
             path.Add(currentPathVertex);
             currentPathVertex = currentPathVertex.prev;
 
@@ -67,6 +71,7 @@ public class Pathfinding : MonoBehaviour
         path.Reverse();
         return path;
     }
+    
     
     public List<Vertex> FindPathBFS()   // находит путь, кратчайший ТОЛЬКО если все расстояния между вершинами одинавые (maxNeighbourDistance = 3)
     {
