@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class Edge : IComparable<Edge>
 {
-    public float cost;
-    public Vertex vertex;
+    public float cost;  // расстояние до соседа
+    public Vertex vertex;   // сосед
 
     public Edge(Vertex vertex = null, float cost = 1.0f)
     {
@@ -14,15 +14,19 @@ public class Edge : IComparable<Edge>
         this.cost = cost;
     }
 
-    public int CompareTo(Edge other)
+    public int CompareTo(Edge other)    // нужно только в алгоритме дейкстры
     {
         float result = cost - other.cost;
-        if (vertex.GetInstanceID() == other.vertex.GetInstanceID())
+        if (vertex.GetInstanceID() == other.vertex.GetInstanceID()) 
+        {
             return 0;
+        }
+        if ((int)result == 0)   // если ребро идет в другого соседа, то не должно быть равно нашему (можно ретурн -1 или 1)
+            return -1;
         return (int)result;
     }
 
-    public bool Equals(Edge other)
+    public bool Equals(Edge other)  // эти не знаю зачем
     {
         return other.vertex.id == vertex.id;
     }
