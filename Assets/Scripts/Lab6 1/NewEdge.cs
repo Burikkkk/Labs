@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewEdge : IComparable<NewEdge> // класс, представляющий ребро графа
+public class NewEdge : MonoBehaviour, IComparable<NewEdge> // класс, представляющий ребро графа
 {
     public float cost;  // расстояние до соседней вершины
     public NewVertex vertex;   // ссылка на соседнюю вершину
