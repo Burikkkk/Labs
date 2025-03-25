@@ -39,6 +39,7 @@ public class Pathfinding : MonoBehaviour
         foreach (var neighbour in startVertex.neighbours)
         {
             toVisit.Push(neighbour.vertex); // добавляем соседа в стек
+            visited[neighbour.vertex.id] = true; // отмечаем вершину соседа как посещенного
             neighbour.vertex.prev = startVertex; // записываем, откуда пришли, чтобы потом восстановить путь
         }
 
@@ -55,12 +56,10 @@ public class Pathfinding : MonoBehaviour
             {
                 if (visited[nextNeighbour.vertex.id] == true) // если уже посещали, пропускаем
                     continue;
-
+                visited[nextNeighbour.vertex.id] = true; // отмечаем вершину соседа как посещенного
                 toVisit.Push(nextNeighbour.vertex); // добавляем соседа в стек
                 nextNeighbour.vertex.prev = currentVertex; // запоминаем, откуда пришли
             }
-
-            visited[currentVertex.id] = true; // отмечаем текущую вершину как посещенную
         }
 
         // начинаем восстановление пути от конечной вершины к стартовой
