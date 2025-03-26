@@ -75,7 +75,7 @@ public class NewPathfinding : MonoBehaviour
         {
             if (drawPath) // если включена отрисовка пути, рисуем линию между вершинами в Unity
                 Debug.DrawLine(currentPathVertex.transform.position,
-                    currentPathVertex.prev.transform.position, Color.green, 1000f);
+                    currentPathVertex.prev.transform.position, Color.blue, 1000f);
 
             path.Add(currentPathVertex); // добавляем вершину в путь
             currentPathVertex = currentPathVertex.prev; // идем к предыдущей вершине
@@ -84,10 +84,10 @@ public class NewPathfinding : MonoBehaviour
         path.Reverse(); // так как путь восстанавливался с конца, переворачиваем его
 
         // выводим id всех вершин пути в консоль
-        foreach (var v in path)
-        {
-            Debug.Log(v.id);
-        }
+        //foreach (var v in path)
+        //{
+        //    Debug.Log(v.id);
+        //}
 
         return path; // возвращаем найденный путь
     }
